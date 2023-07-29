@@ -2,7 +2,12 @@ package com.r3.developers.csdetemplate.utxoexample.workflows
 
 import com.r3.developers.csdetemplate.utxoexample.contracts.ChatContract
 import com.r3.developers.csdetemplate.utxoexample.states.ChatState
-import net.corda.v5.application.flows.*
+import java.time.Duration
+import java.time.Instant
+import net.corda.v5.application.flows.ClientRequestBody
+import net.corda.v5.application.flows.ClientStartableFlow
+import net.corda.v5.application.flows.CordaInject
+import net.corda.v5.application.flows.FlowEngine
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
 import net.corda.v5.base.annotations.Suspendable
@@ -11,14 +16,12 @@ import net.corda.v5.base.types.MemberX500Name
 import net.corda.v5.ledger.common.NotaryLookup
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import java.time.Instant
 
 // A class to hold the deserialized arguments required to start the flow.
 data class CreateNewChatFlowArgs(val chatName: String, val message: String, val otherMember: String)
 
 // See Chat CorDapp Design section of the getting started docs for a description of this flow.
-class CreateNewChatFlow: ClientStartableFlow {
+class CreateNewChatFlow : ClientStartableFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -55,8 +58,8 @@ class CreateNewChatFlow: ClientStartableFlow {
             // Note, in Java CorDapps only unchecked RuntimeExceptions can be thrown not
             // declared checked exceptions as this changes the method signature and breaks override.
             val myInfo = memberLookup.myInfo()
-            val otherMember = memberLookup.lookup(MemberX500Name.parse(flowArgs.otherMember)) ?:
-                throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
+            val otherMember = memberLookup.lookup(MemberX500Name.parse(flowArgs.otherMember))
+                ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
 
             // Create the ChatState from the input arguments and member information.
             val chatState = ChatState(
@@ -70,7 +73,7 @@ class CreateNewChatFlow: ClientStartableFlow {
             val notary = notaryLookup.notaryServices.single()
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            val txBuilder= ledgerService.createTransactionBuilder()
+            val txBuilder = ledgerService.createTransactionBuilder()
                 .setNotary(notary.name)
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addOutputState(chatState)

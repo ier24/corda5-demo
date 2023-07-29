@@ -2,23 +2,26 @@ package com.r3.developers.csdetemplate.utxoexample.workflows
 
 import com.r3.developers.csdetemplate.utxoexample.contracts.ChatContract
 import com.r3.developers.csdetemplate.utxoexample.states.ChatState
-import net.corda.v5.application.flows.*
+import java.time.Duration
+import java.time.Instant
+import java.util.UUID
+import net.corda.v5.application.flows.ClientRequestBody
+import net.corda.v5.application.flows.ClientStartableFlow
+import net.corda.v5.application.flows.CordaInject
+import net.corda.v5.application.flows.FlowEngine
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
 import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import java.time.Instant
-import java.util.*
 
 // A class to hold the deserialized arguments required to start the flow.
 data class UpdateChatFlowArgs(val id: UUID, val message: String)
 
 
 // See Chat CorDapp Design section of the getting started docs for a description of this flow.
-class UpdateChatFlow: ClientStartableFlow {
+class UpdateChatFlow : ClientStartableFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -60,7 +63,8 @@ class UpdateChatFlow: ClientStartableFlow {
             val state = stateAndRef.state.contractState
 
             val members = state.participants.map {
-                memberLookup.lookup(it) ?: throw CordaRuntimeException("Member not found from public key $it.")}
+                memberLookup.lookup(it) ?: throw CordaRuntimeException("Member not found from public key $it.")
+            }
             val otherMember = (members - myInfo).singleOrNull()
                 ?: throw CordaRuntimeException("Should be only one participant other than the initiator.")
 
@@ -68,7 +72,7 @@ class UpdateChatFlow: ClientStartableFlow {
             val newChatState = state.updateMessage(myInfo.name, flowArgs.message)
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            val txBuilder= ledgerService.createTransactionBuilder()
+            val txBuilder = ledgerService.createTransactionBuilder()
                 .setNotary(stateAndRef.state.notaryName)
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addOutputState(newChatState)

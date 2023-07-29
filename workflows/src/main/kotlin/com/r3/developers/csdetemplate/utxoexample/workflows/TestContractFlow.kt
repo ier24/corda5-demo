@@ -2,7 +2,13 @@ package com.r3.developers.csdetemplate.utxoexample.workflows
 
 import com.r3.developers.csdetemplate.utxoexample.contracts.ChatContract
 import com.r3.developers.csdetemplate.utxoexample.states.ChatState
-import net.corda.v5.application.flows.*
+import java.time.Duration
+import java.time.Instant
+import java.util.UUID
+import net.corda.v5.application.flows.ClientRequestBody
+import net.corda.v5.application.flows.ClientStartableFlow
+import net.corda.v5.application.flows.CordaInject
+import net.corda.v5.application.flows.FlowEngine
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
 import net.corda.v5.base.annotations.Suspendable
@@ -13,14 +19,11 @@ import net.corda.v5.ledger.utxo.Command
 import net.corda.v5.ledger.utxo.StateRef
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import java.time.Instant
-import java.util.*
 
 
 data class TestContractFlowArgs(val otherMember: String)
 
-class TestContractFlow: ClientStartableFlow  {
+class TestContractFlow : ClientStartableFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -57,8 +60,8 @@ class TestContractFlow: ClientStartableFlow  {
 
             val myInfo = memberLookup.myInfo()
 
-            val otherMember = memberLookup.lookup(MemberX500Name.parse(flowArgs.otherMember)) ?:
-            throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
+            val otherMember = memberLookup.lookup(MemberX500Name.parse(flowArgs.otherMember))
+                ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
 
             // Obtain the Notary name and public key.
             val notary = notaryLookup.notaryServices.first()
@@ -91,11 +94,9 @@ class TestContractFlow: ClientStartableFlow  {
                 inputStateRef = StateRef(signedTransaction.id, 0)
                 flowEngine.subFlow(FinalizeChatSubFlow(signedTransaction, otherMember.name))
 
-            } catch (e:Exception) {
+            } catch (e: Exception) {
                 throw CordaRuntimeException("Set up transaction could not be created because of exception: ${e.message}")
             }
-
-
 
 
             // *************   START TESTS ****************
@@ -122,24 +123,28 @@ class TestContractFlow: ClientStartableFlow  {
 
                 "Fail"
 
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("Requires a single command.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
 
 
             // ChatState with 3 Participants not permitted
-            results["ChatState with 3 Participants not permitted"]  = try {
+            results["ChatState with 3 Participants not permitted"] = try {
 
                 val chatState = ChatState(
                     chatName = "DummyChat",
                     messageFrom = myInfo.name,
                     message = "Dummy Message",
-                    participants = listOf(myInfo.ledgerKeys.first(), otherMember.ledgerKeys.first(), otherMember.ledgerKeys.first())
+                    participants = listOf(
+                        myInfo.ledgerKeys.first(),
+                        otherMember.ledgerKeys.first(),
+                        otherMember.ledgerKeys.first()
+                    )
                 )
 
                 val txBuilder = ledgerService.createTransactionBuilder()
@@ -154,11 +159,11 @@ class TestContractFlow: ClientStartableFlow  {
 
                 "Fail"
 
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("The output state should have two and only two participants.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -186,19 +191,19 @@ class TestContractFlow: ClientStartableFlow  {
 
                 "Fail"
 
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Create there should be no input states.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
 
             // Zero output States on Create not permitted
 
-                // Test omitted as it would fail on
-                // "The output state should have two and only two participants." first
+            // Test omitted as it would fail on
+            // "The output state should have two and only two participants." first
 
 
             // Two output States on Create not permitted
@@ -222,11 +227,11 @@ class TestContractFlow: ClientStartableFlow  {
                 val signedTransaction = txBuilder.toSignedTransaction()
 
                 "Fail"
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Create there should be one and only one output state.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -255,11 +260,11 @@ class TestContractFlow: ClientStartableFlow  {
 
                 "Fail"
 
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Update there should be one and only one input state.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -291,11 +296,11 @@ class TestContractFlow: ClientStartableFlow  {
 
                 "Fail"
 
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Update there should be one and only one input state.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -303,8 +308,8 @@ class TestContractFlow: ClientStartableFlow  {
 
             // Zero output States on Update not permitted
 
-                // Test omitted as it would fail on
-                // "The output state should have two and only two participants." first
+            // Test omitted as it would fail on
+            // "The output state should have two and only two participants." first
 
 
             // Two output States on Update not permitted
@@ -330,11 +335,11 @@ class TestContractFlow: ClientStartableFlow  {
                 val signedTransaction = txBuilder.toSignedTransaction()
 
                 "Fail"
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Update there should be one and only one output state.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -362,11 +367,11 @@ class TestContractFlow: ClientStartableFlow  {
                 val signedTransaction = txBuilder.toSignedTransaction()
 
                 "Fail"
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Update id must not change")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -394,11 +399,11 @@ class TestContractFlow: ClientStartableFlow  {
                 val signedTransaction = txBuilder.toSignedTransaction()
 
                 "Fail"
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Update chatName must not change.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -426,11 +431,11 @@ class TestContractFlow: ClientStartableFlow  {
                 val signedTransaction = txBuilder.toSignedTransaction()
 
                 "Fail"
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("When command is Update participants must not change.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
@@ -459,11 +464,11 @@ class TestContractFlow: ClientStartableFlow  {
 
                 "Fail"
 
-            } catch (e:Exception) {
-                val exceptionMessage =  e.message ?: "No exception message"
+            } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "No exception message"
                 if (exceptionMessage.contains("Command not allowed.")) {
-                    "Pass" }
-                else {
+                    "Pass"
+                } else {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }

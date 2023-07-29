@@ -110,3 +110,11 @@ After a few back and forth of the messaging, you can view entire chat history by
 And as for the result, you need to go to the Get API again and enter the short hash and client request ID.
 
 Thus, we have concluded a full run through of the chat app. 
+
+## Memo
+検証環境
+- MacOS(ARM)
+- IntelliJ IDEA 2022.3.2 (Community Edition)
+- Zulu11.50+19-CA
+- Docker version 24.0.2, build cb74dfc
+- Docker Desktop 4.21.1 (114176)

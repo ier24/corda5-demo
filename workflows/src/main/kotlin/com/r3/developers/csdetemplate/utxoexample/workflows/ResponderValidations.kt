@@ -19,6 +19,6 @@ fun checkForBannedWords(str: String) {
 // memberX500Name, if not it throws an exception.
 @Suspendable
 fun checkMessageFromMatchesCounterparty(state: ChatState, otherMember: MemberX500Name) {
-   if( state.messageFrom != otherMember)
-       throw CordaRuntimeException("Failed verification - messageFrom does not equal flow initiator memberX500Name")
+    if (state.messageFrom != otherMember)
+        throw CordaRuntimeException("Failed verification - messageFrom does not equal flow initiator memberX500Name")
 }

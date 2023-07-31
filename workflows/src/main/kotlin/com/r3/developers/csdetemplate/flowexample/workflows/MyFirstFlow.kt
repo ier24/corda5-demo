@@ -1,6 +1,11 @@
 package com.r3.developers.csdetemplate.flowexample.workflows
 
-import net.corda.v5.application.flows.*
+import net.corda.v5.application.flows.ClientRequestBody
+import net.corda.v5.application.flows.ClientStartableFlow
+import net.corda.v5.application.flows.CordaInject
+import net.corda.v5.application.flows.InitiatedBy
+import net.corda.v5.application.flows.InitiatingFlow
+import net.corda.v5.application.flows.ResponderFlow
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
 import net.corda.v5.application.messaging.FlowMessaging
@@ -24,7 +29,7 @@ class Message(val sender: MemberX500Name, val message: String)
 // to link the two sides of the flow together they need to have the same protocol.
 @InitiatingFlow(protocol = "my-first-flow")
 // MyFirstFlow should inherit from ClientStartableFlow, which tells Corda it can be started via an REST call from a client
-class MyFirstFlow: ClientStartableFlow {
+class MyFirstFlow : ClientStartableFlow {
 
     // It is useful to be able to log messages from the flows for debugging.
     private companion object {
@@ -47,7 +52,6 @@ class MyFirstFlow: ClientStartableFlow {
     // this CorDapp is operating in.
     @CordaInject
     lateinit var memberLookup: MemberLookup
-
 
 
     // When a flow is invoked its call() method is called.
@@ -97,7 +101,7 @@ class MyFirstFlow: ClientStartableFlow {
 // to link the two sides of the flow together they need to have the same protocol.
 @InitiatedBy(protocol = "my-first-flow")
 // Responder flows must inherit from ResponderFlow
-class MyFirstFlowResponder: ResponderFlow {
+class MyFirstFlowResponder : ResponderFlow {
 
     // It is useful to be able to log messages from the flows for debugging.
     private companion object {
@@ -132,8 +136,10 @@ class MyFirstFlowResponder: ResponderFlow {
         val ourIdentity = memberLookup.myInfo().name
 
         // Create a response to greet the sender
-        val response = Message(ourIdentity,
-            "Hello ${session.counterparty.commonName}, best wishes from ${ourIdentity.commonName}")
+        val response = Message(
+            ourIdentity,
+            "Hello ${session.counterparty.commonName}, best wishes from ${ourIdentity.commonName}"
+        )
 
         // Log the response to be sent.
         log.info("MFF: response.message: ${response.message}")

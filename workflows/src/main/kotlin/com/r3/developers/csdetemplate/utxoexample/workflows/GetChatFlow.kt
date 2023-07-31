@@ -1,6 +1,7 @@
 package com.r3.developers.csdetemplate.utxoexample.workflows
 
 import com.r3.developers.csdetemplate.utxoexample.states.ChatState
+import java.util.UUID
 import net.corda.v5.application.flows.ClientRequestBody
 import net.corda.v5.application.flows.ClientStartableFlow
 import net.corda.v5.application.flows.CordaInject
@@ -10,7 +11,6 @@ import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.ledger.utxo.StateAndRef
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
-import java.util.*
 
 // A class to hold the deserialized arguments required to start the flow.
 data class GetChatFlowArgs(val id: UUID, val numberOfRecords: Int)
@@ -19,7 +19,7 @@ data class GetChatFlowArgs(val id: UUID, val numberOfRecords: Int)
 data class MessageAndSender(val messageFrom: String, val message: String)
 
 // See Chat CorDapp Design section of the getting started docs for a description of this flow.
-class GetChatFlow: ClientStartableFlow {
+class GetChatFlow : ClientStartableFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -45,11 +45,11 @@ class GetChatFlow: ClientStartableFlow {
         // This is an inefficient way to perform this operation when there are a large number of chats.
         // Note, you will get this error if you input an id which has no corresponding ChatState (common error).
         val states = ledgerService.findUnconsumedStatesByType(ChatState::class.java)
-        val state = states.singleOrNull {it.state.contractState.id == flowArgs.id}
+        val state = states.singleOrNull { it.state.contractState.id == flowArgs.id }
             ?: throw CordaRuntimeException("Did not find an unique unconsumed ChatState with id ${flowArgs.id}")
 
         // Calls resolveMessagesFromBackchain() which retrieves the chat history from the backchain.
-        return jsonMarshallingService.format(resolveMessagesFromBackchain(state, flowArgs.numberOfRecords ))
+        return jsonMarshallingService.format(resolveMessagesFromBackchain(state, flowArgs.numberOfRecords))
     }
 
     // resoveMessageFromBackchain() starts at the stateAndRef provided, which represents the unconsumed head of the
@@ -57,7 +57,10 @@ class GetChatFlow: ClientStartableFlow {
     // the numberOfRecords argument. For each transaction it adds the MessageAndSender representing the
     // message and who sent it to a list which is then returned.
     @Suspendable
-    private fun resolveMessagesFromBackchain(stateAndRef: StateAndRef<ChatState>, numberOfRecords: Int): List<MessageAndSender>{
+    private fun resolveMessagesFromBackchain(
+        stateAndRef: StateAndRef<ChatState>,
+        numberOfRecords: Int
+    ): List<MessageAndSender> {
 
         // Set up a MutableList to collect the MessageAndSender(s)
         val messages = mutableListOf<MessageAndSender>()
@@ -98,8 +101,8 @@ class GetChatFlow: ClientStartableFlow {
                 currentStateAndRef = inputStateAndRefs.single() as StateAndRef<ChatState>
             }
         }
-     // Convert to an immutable List.
-     return messages.toList()
+        // Convert to an immutable List.
+        return messages.toList()
     }
 }
 

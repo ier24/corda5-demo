@@ -112,9 +112,22 @@ And as for the result, you need to go to the Get API again and enter the short h
 Thus, we have concluded a full run through of the chat app. 
 
 ## Memo
-検証環境
+### 検証環境
 - MacOS(ARM)
 - IntelliJ IDEA 2022.3.2 (Community Edition)
 - Zulu11.50+19-CA
 - Docker version 24.0.2, build cb74dfc
 - Docker Desktop 4.21.1 (114176)
+
+### ドキュメント
+- https://docs.r3.com/en/platform/corda/5.0/developing-applications/basic-cordapp.html
+  - 配送・支払いのDVPのケース。
+  - 当事者は果樹園農家のBobと顧客のDave
+  1. Bob->Daveにりんごの引き換え券を発行
+  2. Bobが必要なりんごの量を準備
+  3. 引換券とりんごをDaveが交換リクエスト
+  4. 引換券に使用済みマークがつけられ、りんごをDaveにわたす
+
+実装で出てくる謎の単位"bushel"とは？
+> 英語表記はBushel。 ヤード・ポンド法における体積の単位で、主に穀物の計量に用いられる。 1ブッシェルは、米国では約35リットル、英国では約36リットルで、米国の単位を「ウィンチェスター・ブッシェル」、英国の単位を「インペリアル・ブッシェル」と呼ぶこともある。
+

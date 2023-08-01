@@ -131,3 +131,10 @@ Thus, we have concluded a full run through of the chat app.
 実装で出てくる謎の単位"bushel"とは？
 > 英語表記はBushel。 ヤード・ポンド法における体積の単位で、主に穀物の計量に用いられる。 1ブッシェルは、米国では約35リットル、英国では約36リットルで、米国の単位を「ウィンチェスター・ブッシェル」、英国の単位を「インペリアル・ブッシェル」と呼ぶこともある。
 
+### 起動手順
+1. Gradle taskの`startCorda`を実行する
+2. Gradle taskの`5-vNodeSetup`を実行する
+    - cpbをビルド→groupPolicyを作成→cpbとcpiへの署名鍵を生成→cpiをビルド&署名→Cordaにcpiをアップロード→仮想ノードを作成してCPI登録
+3. https://localhost:8888/api/v1/swagger#/ で各種機能を確認。
+
+参考：https://docs.r3.com/en/platform/corda/5.0/developing-applications/getting-started/running-your-first-cordapp.html

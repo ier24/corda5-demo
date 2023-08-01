@@ -7,10 +7,10 @@ import net.corda.v5.ledger.utxo.ContractState
 
 @BelongsToContract(BasketOfApplesContract::class)
 class BasketOfApples(
-    private val description: String,
-    private val farm: PublicKey,
-    private val owner: PublicKey,
-    private val weight: Int,
+    val description: String,
+    val farm: PublicKey,
+    val owner: PublicKey,
+    val weight: Int,
     private val participants: List<PublicKey>
 ) : ContractState {
     override fun getParticipants(): List<PublicKey> = participants

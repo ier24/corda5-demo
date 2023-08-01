@@ -8,10 +8,10 @@ import net.corda.v5.ledger.utxo.ContractState
 
 @BelongsToContract(AppleStampContract::class)
 class AppleStamp(
-    private val id: UUID,
-    private val stampDesc: String,
-    private val issuer: PublicKey,
-    private val owner: PublicKey,
+    val id: UUID,
+    val stampDesc: String,
+    val issuer: PublicKey,
+    val owner: PublicKey,
     /**
      * The PublicKeys referred to in the participants property are the ledgerKeys of the participants expected to store the states.
      * https://docs.r3.com/en/platform/corda/5.0/developing-applications/basic-cordapp/state.html
